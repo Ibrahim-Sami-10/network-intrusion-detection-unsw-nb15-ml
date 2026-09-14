@@ -1,0 +1,18 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Bytecode & Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Data Files (Avoid pushing multi-megabyte CSVs)
+data/raw/*.csv
+data/processed/*.csv
+
+# System files
+.DS_Store
+Thumbs.db

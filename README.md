@@ -1,107 +1,391 @@
 # Enterprise AI-Powered Network Intrusion Detection System (NIDS)
 
-An end-to-end machine learning engineering framework designed to detect, classify, and mitigate zero-day perimeter intrusions and anomalous network telemetry in real time. Built upon the comprehensive **UNSW-NB15** network benchmark, this system integrates modular data engineering pipelines, multi-model evaluation focusing on high-recall security boundaries, and an interactive Security Operations Center (SOC) dashboard.
+An end-to-end **Machine Learning-based Network Intrusion Detection System (NIDS)** built using the **UNSW-NB15 dataset**. The system trains multiple classification models, evaluates their performance, selects a champion model, and provides an interactive **Streamlit SOC-style dashboard** for network traffic inspection and threat detection.
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Live%20Demo-red.svg)](https://securenet-nids.streamlit.app/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+![NIDS Dashboard Demo](https://github.com/user-attachments/assets/eae334e0-66c1-4a46-bd30-b22cee6d46cc)
+
+## 🚀 Live Demo
+
+**Try the deployed Streamlit dashboard:**
+
+👉 https://securenet-nids.streamlit.app/
+
+The application allows users to inspect network-flow CSV files and simulate individual network packets for malicious/normal traffic classification.
 
 ---
 
-## System Architecture
+## 📌 Project Overview
+
+Network attacks can generate traffic patterns that are difficult to identify manually. This project uses supervised machine learning to classify network traffic as:
+
+* **0 → Normal / Benign**
+* **1 → Malicious / Attack**
+
+The system trains and compares three machine-learning models:
+
+1. Logistic Regression
+2. Decision Tree
+3. Random Forest
+
+The models are evaluated using accuracy, precision, recall, and F1-score, with particular attention to **attack recall**, since missing a malicious connection can be more costly than generating a false alarm.
+
+---
+
+## 🏗️ System Architecture
 
 ```text
-Raw Network Packets / Ingested PCAP Streams
-                    │
-                    ▼
-     [ Data Sanitization & Imputation ] ──> Handles protocol tokens & missing values
-                    │
-                    ▼
-    [ Transformer Pipeline (ColumnTransformer) ]
-       ├── Robust Standard Scaler (Continuous Header Metrics)
-       └── One-Hot Encoding (Protocol, Service, State Flags)
-                    │
-                    ▼
-         [ Multi-Model Benchmarking ]
-       ├── Logistic Regression (Baseline Linear Boundary)
-       ├── Decision Tree Classifier (Orthogonal Feature Splitting)
-       └── Random Forest Ensemble (Variance Reduction & Feature Importance)
-                    │
-                    ▼
-    [ Champion Serialization & Threat Engine ]
-       ├── best_model.joblib (Optimized for Attack Recall)
-       └── preprocessor.joblib (Stateful Input Transformer)
-                    │
-                    ▼
-   [ Real-Time Streamlit SOC Dashboard (app.py) ]
-       ├── Dynamic Batch Ingestion & Real-Time Threat Scoring
-       ├── Single-Packet Simulation & Header Anomaly Inspection
-       └── Dynamic Confusion Matrix & Ingestion Ratio Telemetry
+                    UNSW-NB15 Dataset
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │   Data Preprocessing │
+                │                     │
+                │ • Missing values    │
+                │ • Categorical data  │
+                │ • StandardScaler    │
+                │ • One-Hot Encoding  │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │   Model Training    │
+                │                     │
+                │ • Logistic Reg.     │
+                │ • Decision Tree     │
+                │ • Random Forest     │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │     Evaluation      │
+                │                     │
+                │ Accuracy            │
+                │ Precision           │
+                │ Recall              │
+                │ F1-Score            │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │ Best Model      │
+                │ best_model.joblib   │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │ Streamlit Dashboard │
+                │                     │
+                │ • CSV Inspection    │
+                │ • Packet Simulation │
+                │ • Metrics           │
+                │ • Visualizations    │
+                └─────────────────────┘
 ```
 
 ---
 
-## Key Features
+## ✨ Key Features
 
-- **Strict Train-Test Isolation:** Feature transformation pipelines are fitted strictly against the training distribution, preventing data leakage across test evaluations.
-- **Recall-Optimized Objective:** Prioritizes attack recall over generic accuracy to minimize **False Negatives** (unmitigated intrusions bypassing perimeter defenses).
-- **Dynamic Streamlit SOC Console:** Automatically recalculates live accuracy, attack ratio, and confusion matrices when processing newly ingested packet logs.
-- **Modular Pipeline Architecture:** Provides production-grade separation between research notebooks (`notebooks/`) and headless automation modules (`src/`).
+### 🔹 Machine Learning Classification
+
+* Logistic Regression
+* Decision Tree
+* Random Forest
+* Binary network-traffic classification
+* Model comparison using standard classification metrics
+* Champion model saved using Joblib
+
+### 🔹 Data Preprocessing
+
+* Numerical feature scaling using `StandardScaler`
+* Categorical feature encoding using `OneHotEncoder`
+* Unknown categorical values handled safely
+* Training-fitted preprocessing pipeline reused during inference
+* Separate training and testing datasets
+
+### 🔹 Threat Detection
+
+The dashboard supports:
+
+* **Batch CSV Inspection**
+* **Single Packet Simulation**
+* Prediction of Normal vs Malicious traffic
+* Prediction confidence when supported by the model
+* Evaluation metrics when ground-truth labels are included in the uploaded CSV
+
+### 🔹 Security Operations Dashboard
+
+The Streamlit dashboard provides:
+
+* Overview metrics
+* Model performance visualization
+* Confusion matrix
+* Classification metrics
+* Threat detection interface
+* Packet simulation
+* Interactive network-traffic inspection
 
 ---
 
-## Directory Organization
+## 📊 Benchmark Results
+
+The three machine-learning models were compared using the UNSW-NB15 testing data.
+
+| Model               |   Accuracy |     Recall |  Precision |   F1-Score |
+| ------------------- | ---------: | ---------: | ---------: | ---------: |
+| Logistic Regression |     81.20% |     78.40% |     84.10% |     81.10% |
+| Decision Tree       |     86.80% |     88.20% |     87.40% |     87.80% |
+| **Random Forest**   | **90.25%** | **86.69%** | **98.85%** | **92.37%** |
+
+### Why Recall Matters
+
+For an intrusion detection system, **recall is particularly important** because it measures how many actual malicious connections are successfully detected.
+
+A model with poor recall may allow real attacks to pass through undetected.
+
+At the same time, precision is important because excessive false positives can overwhelm security analysts with unnecessary alerts.
+
+---
+
+## 📈 Evaluation Metrics
+
+| Metric           | Description                                                    |
+| ---------------- | -------------------------------------------------------------- |
+| Accuracy         | Percentage of all correctly classified network connections.    |
+| Precision        | Percentage of predicted attacks that were actually malicious.  |
+| Recall           | Percentage of actual malicious connections correctly detected. |
+| F1-Score         | Harmonic mean of precision and recall.                         |
+| Confusion Matrix | Shows correct and incorrect predictions for each class.        |
+
+The evaluation script generates the detailed metrics and stores them in:
+
+```text
+models/metrics_summary.json
+```
+
+A confusion-matrix visualization is generated at:
+
+```text
+static/confusion_matrix.png
+```
+
+---
+
+## 🖥️ Streamlit SOC Dashboard
+
+The deployed Streamlit dashboard combines monitoring, visualization, and inference into a single interface.
+
+### 1. Overview Dashboard
+
+Displays the project's main model and dataset information.
+
+### 2. Visualizations & Metrics
+
+Provides:
+
+* Model evaluation metrics
+* Classification results
+* Confusion matrix
+* Performance comparison
+
+### 3. Threat Detection
+
+#### Batch CSV Inspection
+
+Users can upload a CSV containing UNSW-NB15-compatible network-flow features.
+
+The application:
+
+1. Reads the uploaded CSV.
+2. Removes non-feature columns such as `id`, `label`, and `attack_cat` when present.
+3. Cleans categorical features.
+4. Applies the saved preprocessing pipeline.
+5. Generates predictions using the trained model.
+6. Displays `NORMAL` or `MALICIOUS` classifications.
+7. Displays prediction confidence when supported.
+8. Calculates evaluation metrics when ground-truth labels are available.
+
+#### Single Packet Simulation
+
+Users can manually enter selected network-flow characteristics such as:
+
+* Duration
+* Source packets
+* Destination packets
+* Source bytes
+* Destination bytes
+* Protocol
+* Service
+* Connection state
+* Rate
+* Source TTL
+
+The remaining required features are populated using the application's simulation defaults before the trained model performs inference.
+
+---
+
+## 📂 Dataset
+
+This project uses the **UNSW-NB15 dataset**, a widely used benchmark dataset for network intrusion detection research.
+
+The dataset contains normal network traffic and multiple categories of attacks, including:
+
+* Fuzzers
+* Analysis
+* Backdoors
+* DoS
+* Exploits
+* Generic
+* Reconnaissance
+* Shellcode
+* Worms
+
+### Dataset Size
+
+| Dataset      |     Records |
+| ------------ | ----------: |
+| Training Set |     175,341 |
+| Testing Set  |      82,332 |
+| **Total**    | **257,673** |
+
+Dataset source:
+
+https://research.unsw.edu.au/projects/unsw-nb15-dataset
+
+---
+
+## 🔬 Machine Learning Pipeline
+
+### Step 1 — Data Loading
+
+The training and testing CSV files are loaded from:
+
+```text
+data/raw/
+```
+
+### Step 2 — Data Cleaning
+
+The preprocessing script:
+
+* Removes the `id` column.
+* Cleans categorical values.
+* Handles missing categorical values.
+* Separates the target `label`.
+* Removes `attack_cat` from the binary classification features.
+
+### Step 3 — Feature Transformation
+
+Numerical features are transformed using:
+
+```python
+StandardScaler()
+```
+
+Categorical features are transformed using:
+
+```python
+OneHotEncoder(handle_unknown="ignore", sparse_output=False)
+```
+
+The transformations are combined using a `ColumnTransformer`.
+
+### Step 4 — Model Training
+
+The project trains:
+
+```text
+Logistic Regression
+Decision Tree
+Random Forest
+```
+
+### Step 5 — Model Evaluation
+
+The models are evaluated on the testing dataset using:
+
+* Accuracy
+* Precision
+* Recall
+* F1-score
+* Confusion Matrix
+
+### Step 6 — Model Saving
+
+The selected model is saved as:
+
+```text
+models/best_model.joblib
+```
+
+The fitted preprocessing pipeline is saved as:
+
+```text
+data/processed/preprocessor.joblib
+```
+
+---
+
+## 📁 Project Structure
 
 ```text
 network-intrusion-detection-unsw-nb15-ml/
 │
-├── notebooks/
-│   ├── 01_data_preprocessing_and_eda.ipynb    # Data exploration & feature engineering
-│   └── 02_model_training_and_evaluation.ipynb  # Multi-algorithm tuning & evaluation
+├── app.py
+├── requirements.txt
+├── README.md
+├── LICENSE
+│
+├── data/
+│   ├── raw/
+│   │   ├── UNSW_NB15_training-set.csv
+│   │   └── UNSW_NB15_testing-set.csv
+│   │
+│   └── processed/
+│       ├── X_train_processed.csv
+│       ├── X_test_processed.csv
+│       ├── y_train.csv
+│       ├── y_test.csv
+│       └── preprocessor.joblib
+│
+├── models/
+│   ├── best_model.joblib
+│   └── metrics_summary.json
 │
 ├── src/
-│   ├── __init__.py               # Python package initialization
-│   ├── preprocess.py             # Reusable ETL & transformation script
-│   ├── train.py                  # Headless training & model selection script
-│   └── evaluate.py               # Test-set benchmarking & matrix generation
+│   ├── preprocess.py
+│   ├── train.py
+│   └── evaluate.py
 │
-├── static/
-│   ├── confusion_matrix.png      # Baseline test set confusion matrix
-│   └── eda_attack_distribution.png # Attack category frequency distribution
-│
-├── app.py                        # Real-time Streamlit SOC monitoring interface
-├── requirements.txt              # Pinned, deterministic dependency manifest
-└── README.md
+└── static/
+    └── confusion_matrix.png
 ```
 
 ---
 
-## Dataset Description: UNSW-NB15
-
-The **UNSW-NB15** dataset was created using an IXIA PerfectStorm tool in the Cyber Range Lab of the Australian Centre for Cyber Security (ACCS) to generate a hybrid of real modern normal activities and contemporary synthetic attack behaviors.
-
-- **Total Records benchmarked:** 175,341 training flows and 82,332 testing flows.
-- **Target Classes:** Binary classification (`0` for Benign traffic, `1` for Malicious intrusion).
-- **Attack Vectors Covered:** Fuzzers, Analysis, Backdoors, DoS, Exploits, Generic, Reconnaissance, Shellcode, and Worms.
-- **Key Header Features:** Continuous metrics (`dur`, `sbytes`, `dbytes`, `rate`, `sttl`) and categorical connection markers (`proto`, `service`, `state`).
-
----
-
-## Installation & Environment Setup
+## ⚙️ Installation
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/network-intrusion-detection-unsw-nb15-ml.git
+git clone https://github.com/Ibrahim-Sami-10/network-intrusion-detection-unsw-nb15-ml.git
 cd network-intrusion-detection-unsw-nb15-ml
 ```
 
-### 2. Configure Virtual Environment
+### 2. Create a Virtual Environment
 
 ```bash
-# Windows:
 python -m venv venv
-.\venv\Scripts\activate
+```
 
-# Linux / macOS:
-python3 -m venv venv
-source venv/bin/activate
+Activate it on Windows:
+
+```bash
+venv\Scripts\activate
 ```
 
 ### 3. Install Dependencies
@@ -112,74 +396,130 @@ pip install -r requirements.txt
 
 ---
 
-## Execution Workflow
+## ▶️ Running the Project
 
-### Option A: Automated Headless Pipeline (Recommended)
-
-Run the automated source modules directly from the repository root:
+### Step 1 — Preprocess the Dataset
 
 ```bash
-# 1. Preprocess raw data, scale features, and serialize transformer
 python src/preprocess.py
+```
 
-# 2. Train candidate models and select the champion architecture
+This creates the processed training/testing datasets and saves the fitted preprocessing pipeline.
+
+### Step 2 — Train the Models
+
+```bash
 python src/train.py
+```
 
-# 3. Evaluate on unseen test partitions and export static metrics
+This trains the three candidate models and saves the selected model to:
+
+```text
+models/best_model.joblib
+```
+
+### Step 3 — Generate Evaluation Results
+
+```bash
 python src/evaluate.py
 ```
 
-### Option B: Interactive Research Notebooks
+This generates:
 
-For step-by-step exploratory inspection and visual analysis:
-
-```bash
-jupyter notebook notebooks/01_data_preprocessing_and_eda.ipynb
-jupyter notebook notebooks/02_model_training_and_evaluation.ipynb
+```text
+models/metrics_summary.json
+static/confusion_matrix.png
 ```
 
-### Option C: Launch the Interactive SOC Dashboard
-
-Deploy the local web-based intrusion detection interface:
+### Step 4 — Launch the Dashboard
 
 ```bash
 streamlit run app.py
 ```
 
----
-
-## Performance & Security Evaluation
-
-The classification models were benchmarked across standard performance dimensions on the unseen test set ($N = 82,332$). In an enterprise NIDS deployment, **Attack Recall** is prioritized to reduce critical blind spots:
-
-$$
-\text{Recall} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}}
-$$
-
-| Model Architecture               |  Accuracy  | Attack Recall | Precision  |  F1-Score  |
-| :------------------------------- | :--------: | :-----------: | :--------: | :--------: |
-| **Logistic Regression**          |   ~81.2%   |    ~78.4%     |   ~84.1%   |   ~81.1%   |
-| **Decision Tree (max_depth=12)** |   ~86.8%   |    ~88.2%     |   ~87.4%   |   ~87.8%   |
-| **Random Forest (Best)**         | **~90.3%** |  **~92.1%**   | **~89.8%** | **~90.9%** |
-
-### Security Implications
-
-- **Low False Negatives:** The Random Forest champion minimizes instances where malicious packets slip into the internal network as legitimate traffic.
-- **Controlled False Positives:** Precision remains near 90%, preventing Security Operations Center (SOC) alert fatigue while maintaining high perimeter coverage.
+The dashboard will then be available locally through Streamlit.
 
 ---
 
-## Dashboard Walkthrough (`app.py`)
+## 🛠️ Technologies Used
 
-- **Overview Dashboard:** Provides continuous tracking of total ingested packet volume, classified threats, normal flows, and real-time detection ratios.
-- **Visualizations & Metrics:** Renders dynamic confusion matrices and traffic distributions that adapt directly to uploaded packet logs.
-- **Threat Detection Engine:**
-  - **Batch Packet Analysis:** Accepts arbitrary network log CSVs, applies the saved preprocessor pipeline, and exports timestamped, annotated CSV threat logs.
-  - **Single Packet Simulation:** Allows security operators to manually input connection parameters (`dur`, `proto`, `service`, `sttl`, `spkts`) to inspect inline classification confidence.
+| Technology   | Purpose                                  |
+| ------------ | ---------------------------------------- |
+| Python       | Core programming language                |
+| Pandas       | Data loading and manipulation            |
+| NumPy        | Numerical computation                    |
+| Scikit-learn | Machine learning and preprocessing       |
+| Matplotlib   | Data visualization                       |
+| Seaborn      | Statistical visualization                |
+| Joblib       | Model and preprocessing serialization    |
+| Streamlit    | Interactive web dashboard                |
+| Jupyter      | Exploratory analysis and experimentation |
 
 ---
 
-## License & Citations
+## 🔐 Security Use Case
 
-- **Dataset:** UNSW-NB15 provided by the Cyber Range Lab of the Australian Centre for Cyber Security (ACCS).
-- **License:** Distributed under the MIT License. See `LICENSE` for further details.
+The system is designed as an educational and research-oriented NIDS prototype.
+
+A typical workflow is:
+
+```text
+Network Traffic
+      │
+      ▼
+Feature Extraction
+      │
+      ▼
+Preprocessing
+      │
+      ▼
+Machine Learning Model
+      │
+      ├───────────────┐
+      ▼               ▼
+   NORMAL         MALICIOUS
+                      │
+                      ▼
+                Security Alert
+```
+
+The system can therefore serve as a foundation for experimenting with machine-learning-based network intrusion detection.
+
+---
+
+## ⚠️ Limitations
+
+This implementation has several practical limitations:
+
+* It operates on **CSV network-flow data**, rather than directly capturing live network packets.
+* The single-packet interface is a **simulation**, not a live packet-capture system.
+* The model is trained specifically using the UNSW-NB15 dataset.
+* Performance on real-world network traffic may differ from benchmark results.
+* The system is a machine-learning prototype and should not be treated as a production enterprise IDS without additional validation.
+* The current implementation performs binary classification rather than directly predicting individual attack categories.
+
+---
+
+## 🔮 Future Improvements
+
+Possible future improvements include:
+
+* Live packet capture using tools such as Scapy or Zeek
+* Real-time network monitoring
+* Multi-class attack classification
+* Explainable AI using SHAP
+* Automated security alerts
+* Database-backed threat history
+* User authentication and role-based access
+* Continuous model retraining
+* Model drift monitoring
+* Integration with SIEM platforms
+* Containerized deployment using Docker
+
+---
+
+## 📄 License
+
+This project is released under the **MIT License**.
+
+See the [LICENSE](LICENSE) file for details.

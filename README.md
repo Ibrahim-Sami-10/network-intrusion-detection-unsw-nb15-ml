@@ -1,6 +1,6 @@
 # Enterprise AI-Powered Network Intrusion Detection System (NIDS)
 
-An end-to-end **Machine Learning-based Network Intrusion Detection System (NIDS)** built using the **UNSW-NB15 dataset**. The system trains multiple classification models, evaluates their performance, selects a champion model, and provides an interactive **Streamlit SOC-style dashboard** for network traffic inspection and threat detection.
+An end-to-end **Machine Learning-based Network Intrusion Detection System (NIDS)** built using the **UNSW-NB15 dataset**. The system trains multiple classification models, evaluates their performance, selects a champion model, and provides an interactive **Streamlit SOC-style dashboard** for network traffic inspection, **live multi-source threat intelligence ingestion from public APIs**, and real-time threat detection.
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-Live%20Demo-red.svg)](https://securenet-nids.streamlit.app/)
@@ -14,7 +14,7 @@ An end-to-end **Machine Learning-based Network Intrusion Detection System (NIDS)
 
 👉 https://securenet-nids.streamlit.app/
 
-The application allows users to inspect network-flow CSV files and simulate individual network packets for malicious/normal traffic classification.
+The application allows users to ingest live threat intelligence from public cybersecurity APIs (SANS ISC, abuse.ch Feodo Tracker, Emerging Threats), inspect network-flow CSV files, and simulate individual network packets for malicious/normal traffic classification.
 
 ---
 
@@ -71,19 +71,26 @@ The models are evaluated using accuracy, precision, recall, and F1-score, with p
                            │
                            ▼
                 ┌─────────────────────┐
-                │ Best Model      │
+                │ Best Model          │
                 │ best_model.joblib   │
                 └──────────┬──────────┘
                            │
                            ▼
-                ┌─────────────────────┐
-                │ Streamlit Dashboard │
-                │                     │
-                │ • CSV Inspection    │
-                │ • Packet Simulation │
-                │ • Metrics           │
-                │ • Visualizations    │
-                └─────────────────────┘
+    ┌──────────────────────────────────────────┐
+    │         Streamlit SOC Dashboard          │
+    │                                          │
+    │  • Live Multi-Source API Ingestion        │
+    │    ├─ SANS ISC Attacks & Target Ports     │
+    │    ├─ abuse.ch Feodo Tracker (Botnet C2)  │
+    │    ├─ Emerging Threats Compromised IPs    │
+    │    ├─ Live TCP Socket Probes              │
+    │    └─ Custom API Endpoint Ingestion       │
+    │                                          │
+    │  • Batch CSV Inspection                  │
+    │  • Single Packet Simulation              │
+    │  • Real-time Threat Alert Banners        │
+    │  • Visualizations & Metrics              │
+    └──────────────────────────────────────────┘
 ```
 
 ---
@@ -143,8 +150,8 @@ The three machine-learning models were compared using the UNSW-NB15 testing data
 
 | Model               |   Accuracy |     Recall |  Precision |   F1-Score |
 | ------------------- | ---------: | ---------: | ---------: | ---------: |
-| Logistic Regression |     81.20% |     78.40% |     84.10% |     81.10% |
-| Decision Tree       |     86.80% |     88.20% |     87.40% |     87.80% |
+| Logistic Regression |     87.86% |     83.95% |     97.91% |     90.40% |
+| Decision Tree       |     89.36% |     85.53% |     98.66% |     91.63% |
 | **Random Forest**   | **90.25%** | **86.69%** | **98.85%** | **92.37%** |
 
 ### Why Recall Matters
@@ -183,24 +190,40 @@ static/confusion_matrix.png
 
 ## 🖥️ Streamlit SOC Dashboard
 
-The deployed Streamlit dashboard combines monitoring, visualization, and inference into a single interface.
+The deployed Streamlit dashboard combines monitoring, visualization, live threat intelligence ingestion, and inference into a single interface.
 
 ### 1. Overview Dashboard
 
-Displays the project's main model and dataset information.
+Displays the project's main model and dataset information. When live data or batch data is active, shows real-time KPI scorecards (packets ingested, intrusions detected, attack ratio), per-source feed breakdown tables, and critical threat alert banners.
 
-### 2. Visualizations & Metrics
+### 2. 🌐 Live Multi-Source Stream (Public APIs)
+
+The primary live detection interface. Users can:
+
+* **Toggle individual public feed sources** (SANS ISC Attacks, SANS ISC Target Ports, abuse.ch Feodo Tracker, Emerging Threats Compromised IPs, Live Network Socket Probes).
+* **Adjust records per source** using a slider (3–30 records per feed).
+* **Enable Auto-Stream Mode** for continuous ingestion at configurable intervals (5s, 10s, 15s, 30s).
+* **Ingest from a custom API endpoint** (JSON lists, objects, or line-delimited IP streams).
+* **View real-time threat alert cards** with attacking IP, target port, confidence %, risk level, and feed metadata.
+* **Filter and search** the live inspection log by source feed, classification, IP address, or port.
+* **Download incident reports** as CSV for IR/forensics workflows.
+
+### 3. Visualizations & Metrics
 
 Provides:
 
-* Model evaluation metrics
-* Classification results
-* Confusion matrix
-* Performance comparison
+* Traffic class distribution charts
+* Per-source feed intrusion breakdown (when live data is active)
+* Confusion matrix (when ground-truth labels are available)
+* Model performance comparison matrix
 
-### 3. Threat Detection
+### 4. Threat Detection (Inference)
 
-#### Batch CSV Inspection
+#### 🌐 Live Multi-Source Public Feeds
+
+Quick-access tab to fetch and classify live records from all active public feeds with a single click.
+
+#### 📁 Batch CSV Inspection
 
 Users can upload a CSV containing UNSW-NB15-compatible network-flow features.
 
@@ -215,7 +238,7 @@ The application:
 7. Displays prediction confidence when supported.
 8. Calculates evaluation metrics when ground-truth labels are available.
 
-#### Single Packet Simulation
+#### 🎯 Single Packet Simulation
 
 Users can manually enter selected network-flow characteristics such as:
 
@@ -254,8 +277,8 @@ The dataset contains normal network traffic and multiple categories of attacks, 
 
 | Dataset      |     Records |
 | ------------ | ----------: |
-| Training Set |     175,341 |
-| Testing Set  |      82,332 |
+| Training Set |      82,332 |
+| Testing Set  |     175,341 |
 | **Total**    | **257,673** |
 
 Dataset source:
@@ -341,7 +364,7 @@ data/processed/preprocessor.joblib
 ```text
 network-intrusion-detection-unsw-nb15-ml/
 │
-├── app.py
+├── app.py                          # Streamlit SOC dashboard (main entry point)
 ├── requirements.txt
 ├── README.md
 ├── LICENSE
@@ -362,13 +385,20 @@ network-intrusion-detection-unsw-nb15-ml/
 │   ├── best_model.joblib
 │   └── metrics_summary.json
 │
+├── notebooks/
+│   ├── 01_data_preprocessing_and_eda.ipynb
+│   └── 02_model_training_and_evaluation.ipynb
+│
 ├── src/
+│   ├── __init__.py
 │   ├── preprocess.py
 │   ├── train.py
-│   └── evaluate.py
+│   ├── evaluate.py
+│   └── live_sources.py             # Live multi-source API ingestion engine
 │
 └── static/
-    └── confusion_matrix.png
+    ├── confusion_matrix.png
+    └── eda_attack_distribution.png
 ```
 
 ---
@@ -449,47 +479,59 @@ The dashboard will then be available locally through Streamlit.
 
 ## 🛠️ Technologies Used
 
-| Technology   | Purpose                                  |
-| ------------ | ---------------------------------------- |
-| Python       | Core programming language                |
-| Pandas       | Data loading and manipulation            |
-| NumPy        | Numerical computation                    |
-| Scikit-learn | Machine learning and preprocessing       |
-| Matplotlib   | Data visualization                       |
-| Seaborn      | Statistical visualization                |
-| Joblib       | Model and preprocessing serialization    |
-| Streamlit    | Interactive web dashboard                |
-| Jupyter      | Exploratory analysis and experimentation |
+| Technology          | Purpose                                                    |
+| ------------------- | ---------------------------------------------------------- |
+| Python              | Core programming language                                  |
+| Pandas              | Data loading and manipulation                              |
+| NumPy               | Numerical computation                                      |
+| Scikit-learn        | Machine learning and preprocessing                         |
+| Matplotlib          | Data visualization                                         |
+| Seaborn             | Statistical visualization                                  |
+| Joblib              | Model and preprocessing serialization                      |
+| Streamlit           | Interactive web dashboard                                  |
+| Jupyter             | Exploratory analysis and experimentation                   |
+| urllib / ssl / json  | Live public API ingestion (SANS ISC, abuse.ch, ET)         |
+| socket              | Real-time TCP socket probes for live network telemetry     |
 
 ---
 
 ## 🔐 Security Use Case
 
-The system is designed as an educational and research-oriented NIDS prototype.
+The system is designed as an educational and research-oriented NIDS prototype with live threat intelligence capabilities.
 
 A typical workflow is:
 
 ```text
-Network Traffic
-      │
-      ▼
-Feature Extraction
-      │
-      ▼
-Preprocessing
-      │
-      ▼
-Machine Learning Model
-      │
-      ├───────────────┐
-      ▼               ▼
-   NORMAL         MALICIOUS
-                      │
-                      ▼
-                Security Alert
+  Live Public APIs              CSV Upload           Packet Simulation
+  (SANS ISC, Feodo,             (UNSW-NB15           (Manual Header
+   Emerging Threats)             flow data)            Input)
+        │                          │                      │
+        └──────────┬───────────────┘──────────────────────┘
+                   │
+                   ▼
+          Feature Extraction
+          & Normalization
+                   │
+                   ▼
+        Preprocessing Pipeline
+        (StandardScaler + OHE)
+                   │
+                   ▼
+        Machine Learning Model
+        (Random Forest Champion)
+                   │
+           ┌───────┴───────┐
+           ▼               ▼
+        NORMAL         MALICIOUS
+                           │
+                    ┌──────┴──────┐
+                    ▼             ▼
+              Risk Scoring   SOC Alert
+           (CRITICAL/HIGH/  (Real-time
+            MEDIUM/LOW)     Dashboard)
 ```
 
-The system can therefore serve as a foundation for experimenting with machine-learning-based network intrusion detection.
+The system can therefore serve as a foundation for experimenting with machine-learning-based network intrusion detection, with real-time ingestion from public cybersecurity threat feeds.
 
 ---
 
@@ -497,12 +539,13 @@ The system can therefore serve as a foundation for experimenting with machine-le
 
 This implementation has several practical limitations:
 
-* It operates on **CSV network-flow data**, rather than directly capturing live network packets.
-* The single-packet interface is a **simulation**, not a live packet-capture system.
+* Live data ingestion uses **public threat intelligence API feeds** (SANS ISC, abuse.ch, Emerging Threats) and TCP socket probes rather than raw packet capture (e.g., Scapy, Zeek, or SPAN port mirroring). Features are mapped from API telemetry to the UNSW-NB15 schema rather than extracted directly from packet headers.
+* The single-packet interface is a **simulation** for manual header input, not a live packet-capture system.
 * The model is trained specifically using the UNSW-NB15 dataset.
-* Performance on real-world network traffic may differ from benchmark results.
+* Performance on real-world network traffic may differ from benchmark results, particularly since live API feed data is mapped to model features rather than natively captured.
 * The system is a machine-learning prototype and should not be treated as a production enterprise IDS without additional validation.
-* The current implementation performs binary classification rather than directly predicting individual attack categories.
+* The current implementation performs binary classification (Normal / Malicious) rather than directly predicting individual attack categories.
+* Live API feeds are rate-limited by their upstream providers; ingestion frequency should be configured accordingly.
 
 ---
 
@@ -510,17 +553,17 @@ This implementation has several practical limitations:
 
 Possible future improvements include:
 
-* Live packet capture using tools such as Scapy or Zeek
-* Real-time network monitoring
-* Multi-class attack classification
-* Explainable AI using SHAP
-* Automated security alerts
-* Database-backed threat history
-* User authentication and role-based access
-* Continuous model retraining
-* Model drift monitoring
-* Integration with SIEM platforms
+* Raw packet capture using Scapy or Zeek for direct PCAP-level feature extraction
+* Multi-class attack classification (predicting specific attack categories such as Exploits, DoS, Reconnaissance, etc.)
+* Explainable AI using SHAP to interpret individual predictions
+* Database-backed threat history and persistent incident logging
+* User authentication and role-based access control
+* Continuous model retraining on newly collected live traffic
+* Model drift monitoring to detect degradation over time
+* Integration with SIEM platforms (e.g., Splunk, Elastic SIEM)
 * Containerized deployment using Docker
+* Webhook / Slack / email notifications for critical-severity detections
+* GeoIP enrichment for live threat map visualization
 
 ---
 

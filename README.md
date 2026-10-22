@@ -107,27 +107,33 @@ The models are evaluated using accuracy, precision, recall, and F1-score, with p
 * Training-fitted preprocessing pipeline reused during inference
 * Separate training and testing datasets
 
-### 🔹 Threat Detection
+### 🔹 Threat Detection & Live Telemetry Ingestion
 
 The dashboard supports:
 
-* **Batch CSV Inspection**
-* **Single Packet Simulation**
-* Prediction of Normal vs Malicious traffic
-* Prediction confidence when supported by the model
-* Evaluation metrics when ground-truth labels are included in the uploaded CSV
+* **Live Multi-Source Telemetry (Public APIs)**: Real-time ingestion and threat prediction from 4+ live public cybersecurity feeds and network probes:
+  1. **SANS Internet Storm Center (ISC) Attacks Feed**: Live attacking IP addresses and scan frequencies from SANS global honeypot network (`https://isc.sans.edu/api/sources/attacks/`).
+  2. **SANS ISC Target Ports Telemetry**: Real-time targeted ports, total scanned packet volumes, and scanner counts (`https://isc.sans.edu/api/topports/records/`).
+  3. **abuse.ch Feodo Tracker Botnet C2**: Active botnet command-and-control servers (Emotet, Dridex, QakBot, Bumblebee) (`https://feodotracker.abuse.ch/downloads/ipblocklist.json`).
+  4. **Proofpoint Emerging Threats Compromised Hosts**: Real-time compromised nodes engaged in exploit delivery (`https://rules.emergingthreats.net/blockrules/compromised-ips.txt`).
+  5. **Live Network Socket Telemetry Probe**: Real-time TCP handshake and latency measurements to public DNS/HTTP endpoints (Cloudflare 1.1.1.1, Google 8.8.8.8, Quad9 9.9.9.9).
+  6. **Custom API Endpoint Ingestion**: Input field to ingest live JSON or line-delimited feeds from any custom public or internal security API.
+* **Batch CSV Inspection**: Upload and inspect raw flow capture files.
+* **Single Packet Simulation**: Manually craft packet headers to test classification.
+* **Real-time Threat Prediction**: Normal vs. Malicious classification, model confidence percentages, and severity scoring (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
+* **Auto-Stream Mode**: Configurable continuous ingestion and automated threat classification at regular intervals (5s, 10s, 15s, 30s).
+* **Evaluation Metrics**: Ground-truth evaluation (Accuracy, Precision, Recall, F1) when test labels are provided.
 
 ### 🔹 Security Operations Dashboard
 
 The Streamlit dashboard provides:
 
-* Overview metrics
-* Model performance visualization
-* Confusion matrix
-* Classification metrics
-* Threat detection interface
-* Packet simulation
-* Interactive network-traffic inspection
+* **SOC Dark Cyber Theme**: Cyber threat alert cards, severity badges, and status pills.
+* **Live Ingestion & Prediction Breakdown**: Metrics and comparisons per public source feed.
+* **Overview Metrics**: Packets ingested, attacks detected, normal flows, and threat ratios.
+* **Real-time Threat Alerts**: Instant alert banners displaying threat IP, target port, confidence, and metadata.
+* **Interactive Inspection Log Table**: Search, filter by feed, risk level, or classification, and export incident reports as CSV.
+* **Visualizations**: Traffic class distributions, per-source intrusion breakdowns, and confusion matrices.
 
 ---
 
